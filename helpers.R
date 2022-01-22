@@ -59,11 +59,12 @@ hospital_scores_distribution_map <- function(selected.var.title, selected.format
     }
     
     map_fills <- sapply(data, color_assignement, simplify = TRUE, USE.NAMES = FALSE)
-
+    map_fills <- factor(map_fills, levels = c("turquoise4", "cornsilk1", "brown3", "grey98"))
+      
     map <- function(x,y,dataset,fill_column){
         ggplot(data = dataset, mapping = aes(x = x, y = y, group = group)) +
              geom_polygon(aes(fill = map_fills), colour="grey88") + 
-             scale_fill_identity(name = selected.var.title, guide = "legend",  labels = c("Data not available / Not enough data",worse,avg,better)) + 
+             scale_fill_identity(name = selected.var.title, guide = "legend",  labels = c(better, worse, avg, "Data not available / Not enough data")) + 
              borders("state") + theme(legend.position="bottom", legend.direction="vertical", legend.title = element_text(size = 13), legend.text = element_text(size = 13))
     }    
   }

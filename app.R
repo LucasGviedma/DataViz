@@ -210,7 +210,7 @@ server <- function(input, output) {
     
     hospital_scores_distribution_map(input$variable_selection_input, input$format_selection_input, data, counties, fill_pattern)
     
-  }, width = 800, height = 525)
+  }, width = 800, height = 550)
 }
 
 # Run app ----
