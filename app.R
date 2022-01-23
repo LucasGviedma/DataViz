@@ -36,7 +36,7 @@ id1_df<- id1_cleaning(id1_df)
 id1_df$Score       <- as.numeric(id1_df$Score)
 id1_df$Denominator <- as.numeric(id1_df$Denominator)
 
-id1_missing_counties <- subset(read.csv("aux_missing_counties.csv"), select=c(Location, mean_score))  
+id1_missing_counties <- subset(read.csv("data/aux_missing_counties.csv"), select=c(Location, mean_score))  
 id1_missing_counties <- transform(id1_missing_counties, mean_score = as.numeric(mean_score))
 
 id1_df$State    <- sapply(id1_df$State, id1_state_to_name)
