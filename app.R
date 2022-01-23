@@ -109,9 +109,12 @@ ui <- navbarPage(
              titlePanel("Dot Chart Comparing Measure scores for different hospitals"),
              sidebarLayout(
                sidebarPanel(
-                 selectizeInput("hospital1", "Hospital Name", NULL, options = list(maxItems = 10, placeholder = 'Choose one or more hospitals'), selected = NULL)
+                 selectizeInput("hospital1", "Hospital Name", NULL, options = list(maxItems = 10, placeholder = 'Choose one or more hospitals'), selected = NULL),
+                 em("put the window in full screen for better vizualisation")
                ),
                mainPanel(
+                 h3('Choose one or more hospitals on the side panel', style="color:grey"),
+                 
                  plotlyOutput("plot", height = 700),
                  textInput("filename", "File name:", placeholder = "My Plot"),
                  radioButtons("format", "Choose format", c("png", "bmp", "pdf"), inline = TRUE),
@@ -648,14 +651,41 @@ server <- function(input, output, session) {
   
   output$plot <- renderPlotly({
     
+    if(length(input$hospital1) > 0){
+    
     data <- id3_df[id3_df$Facility.Name %in% input$hospital1,]
     
     ggplotly(ggplot(data, aes(x =Measure.Name, y = Score, col=Facility.Name)) + geom_point() +
                labs(x='Measure Name', fill='Hospital Name') + theme(legend.position=c(0,0))+ 
                scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) ) %>% 
       layout(legend = list(x = 0, y = -0.3, title=list(text='<b> Hospital Name </b>'), orientation="h"))
-    
+    }
   })
+  
+  plotInput = function() {
+    data <- id3_df[id3_df$Facility.Name %in% input$hospital1,]
+    
+    ggplot(data, aes(x =Measure.Name, y = Score, col=Facility.Name)) + geom_point() +
+      labs(x='Measure Name', fill='Hospital Name') + theme(legend.position="bottom")+ 
+      scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
+  }
+  output$download = downloadHandler(
+    filename = function() {
+      paste0(input$filename, ".", input$format)
+    },
+    content = function(file) {
+      if(input$format == 'png'){
+        ggsave(file, plot = plotInput(), device = 'png', width=30, height=20, units='cm', limitsize = TRUE)
+      }
+      
+      if(input$format == 'bmp'){
+        ggsave(file, plot = plotInput(), device = 'bmp', width=30, height=20, units='cm', limitsize = TRUE)
+      }
+      
+      if(input$format == 'pdf'){
+        ggsave(file, plot = plotInput(), device = 'pdf', width=30, height=20, units='cm', limitsize = TRUE)
+      }
+    })
   
   
   # Idiom 4 server logic
