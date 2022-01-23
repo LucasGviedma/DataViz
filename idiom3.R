@@ -19,15 +19,20 @@ ui <- fluidPage(
   titlePanel("Dot Chart Comparing Measure scores for different hospitals"),
   sidebarLayout(
     sidebarPanel(
-      selectizeInput("hospital1", "Hospital Name", NULL, options = list(maxItems = 10, placeholder = 'Choose one or more hospitals'), selected = NULL)
+      selectizeInput("hospital1", "Hospital Name", NULL, options = list(maxItems = 10, placeholder = 'Choose one or more hospitals'), selected = NULL),
       # selectizeInput("hospital2", "Hospital Name", NULL, options = list(maxItems = 1, placeholder = 'Choose a hospital 2'), selected = NULL),
       # selectizeInput("hospital3", "Hospital Name", NULL, options = list(maxItems = 1, placeholder = 'Choose a hospital 3'), selected = NULL),
       # selectizeInput("hospital4", "Hospital Name", NULL, options = list(maxItems = 1, placeholder = 'Choose a hospital 4'), selected = NULL),
       # selectizeInput("hospital5", "Hospital Name", NULL, options = list(maxItems = 1, placeholder = 'Choose a hospital 5'), selected = NULL),
       # selectizeInput("hospital6", "Hospital Name", NULL, options = list(maxItems = 1, placeholder = 'Choose a hospital 6'), selected = NULL)
+      em("put the window in full screen for better vizualisation")  
     ),
     mainPanel(
+
+      h3('Choose one or more hospitals on the side panel', style="color:grey"),
+
       plotlyOutput("plot", height = 700),
+        
       textInput("filename", "File name:", placeholder = "My Plot"),
       radioButtons("format", "Choose format", c("png", "bmp", "pdf"), inline = TRUE),
       downloadButton("download", "Download Chart")
@@ -55,14 +60,47 @@ server <- function(input, output, session) {
     #                    selected$Facility.Name == input$hospital5 |
     #                    selected$Facility.Name == input$hospital6,]
     
-    data <- selected[selected$Facility.Name %in% input$hospital1,]
-
-      ggplotly(ggplot(data, aes(x =Measure.Name, y = Score, col=Facility.Name)) + geom_point() +
-                 labs(x='Measure Name', fill='Hospital Name') + theme(legend.position=c(0,0))+ 
-                 scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) ) %>% 
-                 layout(legend = list(x = 0, y = -0.3, title=list(text='<b> Hospital Name </b>'), orientation="h"))
+    if(length(input$hospital1) > 0){
+      removeUI(
+        "h3",
+        multiple = FALSE,
+        immediate = FALSE,
+        session)
+      
+      data <- selected[selected$Facility.Name %in% input$hospital1,]
+  
+        ggplotly(ggplot(data, aes(x =Measure.Name, y = Score, col=Facility.Name)) + geom_point() +
+                   labs(x='Measure Name', fill='Hospital Name') + theme(legend.position=c(0,0))+ 
+                   scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) ) %>% 
+                   layout(legend = list(x = 0, y = -0.3, title=list(text='<b> Hospital Name </b>'), orientation="h"))
+    }
 
   })
+  
+      plotInput = function() {
+        data <- selected[selected$Facility.Name %in% input$hospital1,]
+        
+        ggplot(data, aes(x =Measure.Name, y = Score, col=Facility.Name)) + geom_point() +
+          labs(x='Measure Name', fill='Hospital Name') + theme(legend.position="bottom")+ 
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
+      }
+      output$download = downloadHandler(
+        filename = function() {
+          paste0(input$filename, ".", input$format)
+        },
+        content = function(file) {
+          if(input$format == 'png'){
+            ggsave(file, plot = plotInput(), device = 'png', width=30, height=20, units='cm', limitsize = TRUE)
+          }
+          
+          if(input$format == 'bmp'){
+            ggsave(file, plot = plotInput(), device = 'bmp', width=30, height=20, units='cm', limitsize = TRUE)
+          }
+          
+          if(input$format == 'pdf'){
+            ggsave(file, plot = plotInput(), device = 'pdf', width=30, height=20, units='cm', limitsize = TRUE)
+          }
+        })
 }
 
 shinyApp(ui, server)
