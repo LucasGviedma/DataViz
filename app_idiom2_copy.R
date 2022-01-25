@@ -1,18 +1,15 @@
 library(shiny)
-library(shinydashboard)
 library(shinythemes)
 library(shinycssloaders)
-library(maps)
-library(mapproj)
-library(ggplot2)
 library(shinyWidgets)
-library(plotly) #interactive graphs
 library(shinyBS) #modals
+library(plotly) #interactive graphs
 library(dplyr)
-suppressPackageStartupMessages(library(circlize))
+
+# suppressPackageStartupMessages(library(circlize))
 
 
-source("helpers.R")
+source("helpers_idiom2.R")
 
 # Load data ----
 data <- read.csv("data/Unplanned_Hospital_Visits-Hospital.csv")
