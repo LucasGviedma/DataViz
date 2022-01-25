@@ -148,6 +148,7 @@ ui <- navbarPage(
                    textOutput("measureChosen"),
                    p("For the following states : "),
                    textOutput("statesChosen"),
+                   helpText("Click on the legend to isolate traits"),
                    plotlyOutput("hospitals")
                  )
                )
@@ -708,31 +709,31 @@ server <- function(input, output, session) {
   
   output$hospitals <- renderPlotly({
     id4_df <- id4_basedf()
-
-    if (id4_df[1,]$Number.of.Hospitals.Worse != "Not Applicable") {
-      chosenColumns <- c("State", "Number.of.Hospitals.Worse", "Number.of.Hospitals.Same", "Number.of.Hospitals.Better", "Number.of.Hospitals.Too.Few")
-    } else {
-      chosenColumns <- c("State", "Number.of.Hospitals.Fewer", "Number.of.Hospitals.Average", "Number.of.Hospitals.More", "Number.of.Hospitals.Too.Small")
+    if(nrow(id4_df) != 0 ) {
+      if (id4_df[1,]$Number.of.Hospitals.Worse != "Not Applicable") {
+        chosenColumns <- c("State", "Number.of.Hospitals.Worse", "Number.of.Hospitals.Same", "Number.of.Hospitals.Better", "Number.of.Hospitals.Too.Few")
+      } else {
+        chosenColumns <- c("State", "Number.of.Hospitals.Fewer", "Number.of.Hospitals.Average", "Number.of.Hospitals.More", "Number.of.Hospitals.Too.Small")
+      }
+      
+      df2 <- melt(id4_df[, chosenColumns])
+      setDT(df2)
+      
+      df_long <- df2 %>% 
+        gather(categoryHospitals, value, -1)
+      
+      df_long <- df_long[df_long$value != "Not Available", ]
+      
+      df_long$value <- as.numeric(as.character(df_long$value))
+      
+      ggplotly(
+        ggplot(df_long[order(df_long$categoryHospitals, decreasing = T),], aes(x = State, y = value, fill = categoryHospitals,group = categoryHospitals))
+        + geom_bar(stat = "identity", position = "fill")
+        + scale_y_continuous(labels = scales::percent)
+        + labs(y= "Percent (%)", x = "States", fill = "Hospitals return rate compared \n to the national's")
+        + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.title = element_text(size=8), legend.text = element_text(size=7))
+      )
     }
-    
-    df2 <- melt(id4_df[, chosenColumns])
-    setDT(df2)
-    
-    df_long <- df2 %>% 
-      gather(categoryHospitals, value, -1)
-    
-    df_long <- df_long[df_long$value != "Not Available", ]
-    
-    df_long$value <- as.numeric(as.character(df_long$value))
-    
-    ggplotly(
-      ggplot(df_long[order(df_long$categoryHospitals, decreasing = T),], aes(x = State, y = value, fill = categoryHospitals,group = categoryHospitals))
-      + geom_bar(stat = "identity", position = "fill")
-      + scale_y_continuous(labels = scales::percent)
-      + labs(y= "Percent (%)", x = "States", fill = "Hospitals return rate compared \n to the national's")
-      + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.title = element_text(size=8), legend.text = element_text(size=7))
-    )
-    
   })
   
 }
