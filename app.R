@@ -817,7 +817,7 @@ server <- function(input, output, session) {
       if (id4_df[1,]$Number.of.Hospitals.Worse != "Not Applicable") {
         chosenColumns <- c("State", "Number.of.Hospitals.Worse", "Number.of.Hospitals.Same", "Number.of.Hospitals.Better", "Number.of.Hospitals.Too.Few")
       } else {
-        chosenColumns <- c("State", "Number.of.Hospitals.Fewer", "Number.of.Hospitals.Average", "Number.of.Hospitals.More", "Number.of.Hospitals.Too.Small")
+        chosenColumns <- c("State", "Number.of.Hospitals.More", "Number.of.Hospitals.Average", "Number.of.Hospitals.Fewer", "Number.of.Hospitals.Too.Small")
       }
       
       df2 <- melt(id4_df[, chosenColumns])
